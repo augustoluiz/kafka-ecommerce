@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class NewOrderMain {
@@ -16,11 +17,12 @@ public class NewOrderMain {
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
 
         //Chave + Valor
-        String value = "123123,456456,789788";
+        String key = UUID.randomUUID().toString();
+        String value = key + "123123,456456,789788";
         String email = "Thank you for your order! We are processing your order!";
 
-        ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", value, value);
-        ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", email, email);
+        ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
+        ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", key, email);
 
         Callback callback = (data, ex) -> {
             if(ex != null){

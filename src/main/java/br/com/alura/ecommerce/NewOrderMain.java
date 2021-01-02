@@ -14,26 +14,28 @@ public class NewOrderMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
+        for (int i = 0; i < 100; i++){
+            KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
 
-        //Chave + Valor
-        String key = UUID.randomUUID().toString();
-        String value = key + "123123,456456,789788";
-        String email = "Thank you for your order! We are processing your order!";
+            //Chave + Valor
+            String key = UUID.randomUUID().toString();
+            String value = key + "123123,456456,789788";
+            String email = "Thank you for your order! We are processing your order!";
 
-        ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
-        ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", key, email);
+            ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
+            ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", key, email);
 
-        Callback callback = (data, ex) -> {
-            if(ex != null){
-                ex.printStackTrace();
-                return;
-            }
-            System.out.println("Sucesso, enviando... " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/timestamp "+data.timestamp());
-        };
+            Callback callback = (data, ex) -> {
+                if(ex != null){
+                    ex.printStackTrace();
+                    return;
+                }
+                System.out.println("Sucesso, enviando... " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/timestamp "+data.timestamp());
+            };
 
-        producer.send(record, callback).get();
-        producer.send(emailRecord, callback).get();
+            producer.send(record, callback).get();
+            producer.send(emailRecord, callback).get();
+        }
 
     }
 

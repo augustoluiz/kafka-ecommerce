@@ -15,10 +15,11 @@ public class FraudeDetectorService {
 
         FraudeDetectorService fraudeDetectorService = new FraudeDetectorService();
 
-        KafkaService service = new KafkaService(FraudeDetectorService.class.getSimpleName(),
+        try(KafkaService service = new KafkaService(FraudeDetectorService.class.getSimpleName(),
                 "ECOMMERCE_NEW_ORDER",
-                fraudeDetectorService::parse);
-        service.run();
+                fraudeDetectorService::parse)) {
+            service.run();
+        }
 
     }
 

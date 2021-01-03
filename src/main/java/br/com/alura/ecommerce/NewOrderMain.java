@@ -14,37 +14,19 @@ public class NewOrderMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        for (int i = 0; i < 100; i++){
-            KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties());
+        try(KafkaDispatcher kafkaDispatcher = new KafkaDispatcher()){
+            for (int i = 0; i < 100; i++){
 
-            //Chave + Valor
-            String key = UUID.randomUUID().toString();
-            String value = key + "123123,456456,789788";
-            String email = "Thank you for your order! We are processing your order!";
+                String key = UUID.randomUUID().toString();
+                String value = key + "123123,456456,789788";
+                kafkaDispatcher.send("ECOMMERCE_NEW_ORDER", key, value);
 
-            ProducerRecord<String, String> record = new ProducerRecord<String, String>("ECOMMERCE_NEW_ORDER", key, value);
-            ProducerRecord<String, String> emailRecord = new ProducerRecord<String, String>("ECOMMERCE_SEND_EMAIL", key, email);
 
-            Callback callback = (data, ex) -> {
-                if(ex != null){
-                    ex.printStackTrace();
-                    return;
-                }
-                System.out.println("Sucesso, enviando... " + data.topic() + ":::partition " + data.partition() + "/ offset " + data.offset() + "/timestamp "+data.timestamp());
-            };
+                String email = "Thank you for your order! We are processing your order!";
+                kafkaDispatcher.send("ECOMMERCE_SEND_EMAIL", key, email);
 
-            producer.send(record, callback).get();
-            producer.send(emailRecord, callback).get();
+            }
         }
-
-    }
-
-    private static Properties properties(){
-        Properties properties = new Properties();
-        properties.setProperty(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
-        return properties;
     }
 
 }

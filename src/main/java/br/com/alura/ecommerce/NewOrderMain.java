@@ -6,6 +6,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.serialization.StringSerializer;
 
+import java.math.BigDecimal;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -14,17 +15,23 @@ public class NewOrderMain {
 
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-        try(KafkaDispatcher kafkaDispatcher = new KafkaDispatcher()){
-            for (int i = 0; i < 100; i++){
+        try(KafkaDispatcher orderDispatcher = new KafkaDispatcher<Order>()){
+            try(KafkaDispatcher emailDispatcher = new KafkaDispatcher<String>()){
+                for (int i = 0; i < 10; i++){
 
-                String key = UUID.randomUUID().toString();
-                String value = key + "123123,456456,789788";
-                kafkaDispatcher.send("ECOMMERCE_NEW_ORDER", key, value);
+                    String key = UUID.randomUUID().toString();
+                    String userId = UUID.randomUUID().toString();
+                    String orderId = UUID.randomUUID().toString();
+                    BigDecimal amount = new BigDecimal(Math.random() * 5000 + 1);
+
+                    Order order = new Order(userId, orderId, amount);
+                    orderDispatcher.send("ECOMMERCE_NEW_ORDER", key, order);
 
 
-                String email = "Thank you for your order! We are processing your order!";
-                kafkaDispatcher.send("ECOMMERCE_SEND_EMAIL", key, email);
+                    String email = "Thank you for your order! We are processing your order!";
+                    emailDispatcher.send("ECOMMERCE_SEND_EMAIL", key, email);
 
+                }
             }
         }
     }

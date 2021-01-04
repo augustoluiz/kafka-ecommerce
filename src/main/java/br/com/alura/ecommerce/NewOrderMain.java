@@ -9,7 +9,7 @@ public class NewOrderMain {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
 
         try(KafkaDispatcher orderDispatcher = new KafkaDispatcher<Order>()){
-            try(KafkaDispatcher emailDispatcher = new KafkaDispatcher<String>()){
+            try(KafkaDispatcher emailDispatcher = new KafkaDispatcher<Email>()){
                 for (int i = 0; i < 10; i++){
 
                     String key = UUID.randomUUID().toString();
@@ -20,8 +20,8 @@ public class NewOrderMain {
                     Order order = new Order(userId, orderId, amount);
                     orderDispatcher.send("ECOMMERCE_NEW_ORDER", key, order);
 
-
-                    String email = "Thank you for your order! We are processing your order!";
+                    String emailBody = "Thank you for your order! We are processing your order!";
+                    Email email = new Email("email test", emailBody);
                     emailDispatcher.send("ECOMMERCE_SEND_EMAIL", key, email);
 
                 }
